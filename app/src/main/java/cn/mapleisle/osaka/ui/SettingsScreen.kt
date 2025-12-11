@@ -164,6 +164,7 @@ fun SettingsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeOption(label: String, selected: Boolean, onClick: () -> Unit) {
     FilterChip(
