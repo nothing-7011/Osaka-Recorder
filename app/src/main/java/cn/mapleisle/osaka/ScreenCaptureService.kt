@@ -26,6 +26,7 @@ import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.ReturnCode
 import kotlinx.coroutines.*
 import java.io.File
+import cn.mapleisle.osaka.data.ConfigManager
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -127,7 +128,7 @@ class ScreenCaptureService : Service() {
     }
 
     private suspend fun uploadToApi(audioFile: File) {
-        val config = getConfig()
+        val config = ConfigManager(this).getConfigSnapshot()
 
         // 自动修正 OpenAI URL 为 Gemini Native URL (防止用户填错)
         val effectiveBaseUrl = if (config.baseUrl.contains("openai")) {
@@ -331,20 +332,6 @@ class ScreenCaptureService : Service() {
             )
         }
     }
-
-    private fun getConfig(): ConfigData {
-        val prefs = getSharedPreferences("app_config", Context.MODE_PRIVATE)
-        return ConfigData(
-            prefs.getString("base_url", "https://generativelanguage.googleapis.com/v1beta/openai/") ?: "",
-            prefs.getString("api_key", "") ?: "",
-            prefs.getString("model_name", "gemini-2.0-flash") ?: "",
-            prefs.getString("timeout", "30")?.toLongOrNull() ?: 30L,
-            prefs.getString("retry", "3")?.toIntOrNull() ?: 3,
-            prefs.getString("system_prompt", "") ?: ""
-        )
-    }
-
-    data class ConfigData(val baseUrl: String, val apiKey: String, val model: String, val timeout: Long, val retry: Int, val systemPrompt: String)
 
     override fun onDestroy() {
         super.onDestroy()
