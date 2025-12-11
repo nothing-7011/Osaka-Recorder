@@ -72,6 +72,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-android:0.11.0")
 
     // 5. 网络和多媒体
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

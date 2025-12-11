@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <application
@@ -38,14 +39,14 @@
             android:name=".ScreenCaptureService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="mediaProjection">
-        </service>
+            android:foregroundServiceType="mediaProjection" />
 
         <service
-            android:name=".OverlayService"
+            android:name=".ProcessingService"
             android:enabled="true"
             android:exported="false"
-            />
+            android:foregroundServiceType="dataSync" />
+
         <service android:name=".OverlayService" android:enabled="true" android:exported="false" />
 
     </application>

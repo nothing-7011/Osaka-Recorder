@@ -13,7 +13,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,19 +38,29 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import cn.mapleisle.osaka.data.HistoryManager
+import com.mikepenz.markdown.m3.Markdown
+import java.io.File
 
 class OverlayService : LifecycleService() {
 
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: ComposeView
 
-    // --- 确保这里只有这一个 companion object ---
     companion object {
         var appState = mutableStateOf("Ready")
-        var resultText = mutableStateOf("等待开始...")
+        var processingStatus = mutableStateOf("")
+        // Removing resultText as we will rely on history
+
+        // This keeps track of the file currently being shown
+        // If null, we might show a default message
+        var currentDisplayedFile = mutableStateOf<File?>(null)
+
+        // Notification dot
+        var hasNewResult = mutableStateOf(false)
 
         fun updateState(state: String) { appState.value = state }
-        fun updateResult(text: String) { resultText.value = text }
+        fun updateProcessingStatus(status: String) { processingStatus.value = status }
     }
 
     override fun onCreate() {
@@ -89,12 +101,41 @@ class OverlayService : LifecycleService() {
     @Composable
     fun OverlayUI() {
         val scrollState = rememberScrollState()
+        val historyFiles = remember { mutableStateListOf<File>() }
+        var showHistoryDropdown by remember { mutableStateOf(false) }
+
+        // Load initial history
+        LaunchedEffect(Unit) {
+            val files = HistoryManager.getHistoryFiles(this@OverlayService)
+            historyFiles.addAll(files)
+            if (files.isNotEmpty() && currentDisplayedFile.value == null) {
+                currentDisplayedFile.value = files.first()
+            }
+        }
+
+        // Listen for new history
+        LaunchedEffect(Unit) {
+            HistoryManager.historyUpdates.collect { newFile ->
+                historyFiles.add(0, newFile)
+                hasNewResult.value = true
+                // Auto-show new result if not recording? Or let user click?
+                // User requirement: "hint user with a small dot"
+            }
+        }
+
+        // Load content
+        var displayContent by remember { mutableStateOf("Ready to Record") }
+        LaunchedEffect(currentDisplayedFile.value) {
+            currentDisplayedFile.value?.let {
+                displayContent = it.readText()
+            }
+        }
 
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xCC222222)),
+            colors = CardDefaults.cardColors(containerColor = Color(0xEE222222)), // Slightly more opaque
             modifier = Modifier
-                .width(280.dp)
+                .width(320.dp) // Wider for markdown
                 .wrapContentHeight()
                 .padding(8.dp)
                 .pointerInput(Unit) {
@@ -108,18 +149,25 @@ class OverlayService : LifecycleService() {
                 }
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
+                // Top Bar: Status + Close
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    val statusColor = when (appState.value) {
-                        "Recording" -> Color.Red
-                        "Processing" -> Color.Yellow
+                    val statusColor = when {
+                        appState.value == "Recording" -> Color.Red
+                        processingStatus.value.isNotEmpty() && processingStatus.value != "Done" -> Color.Yellow
                         else -> Color.Green
                     }
                     Box(modifier = Modifier.size(10.dp).background(statusColor, RoundedCornerShape(50)))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = appState.value, color = Color.White, fontSize = 12.sp, modifier = Modifier.weight(1f))
+
+                    val statusText = if (appState.value == "Recording") "Recording"
+                                     else if (processingStatus.value.isNotEmpty() && processingStatus.value != "Done") processingStatus.value
+                                     else "Ready"
+
+                    Text(text = statusText, color = Color.White, fontSize = 12.sp, modifier = Modifier.weight(1f))
+
                     IconButton(onClick = { stopSelf() }, modifier = Modifier.size(24.dp)) {
                         Icon(Icons.Default.Close, "Close", tint = Color.LightGray)
                     }
@@ -127,19 +175,67 @@ class OverlayService : LifecycleService() {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Control Bar: History Selector
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().height(40.dp)
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        OutlinedButton(
+                            onClick = {
+                                showHistoryDropdown = true
+                                hasNewResult.value = false // Clear dot on open
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                        ) {
+                             Text(
+                                text = currentDisplayedFile.value?.name ?: "Select History",
+                                maxLines = 1,
+                                fontSize = 12.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (hasNewResult.value) {
+                                Icon(Icons.Default.Notifications, contentDescription = "New", tint = Color.Red, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                            }
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                        }
+
+                        DropdownMenu(
+                            expanded = showHistoryDropdown,
+                            onDismissRequest = { showHistoryDropdown = false },
+                            modifier = Modifier.background(Color(0xFF333333)).heightIn(max = 200.dp)
+                        ) {
+                            historyFiles.forEach { file ->
+                                DropdownMenuItem(
+                                    text = { Text(file.name, color = Color.White, fontSize = 12.sp) },
+                                    onClick = {
+                                        currentDisplayedFile.value = file
+                                        showHistoryDropdown = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Content Area: Markdown
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 50.dp, max = 200.dp)
+                        .heightIn(min = 100.dp, max = 300.dp)
                         .background(Color(0x66000000), RoundedCornerShape(8.dp))
                         .padding(8.dp)
                         .verticalScroll(scrollState)
                 ) {
-                    Text(
-                        text = resultText.value,
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        lineHeight = 18.sp
+                    // Use simple Text if Markdown causes issues in preview or context
+                    Markdown(
+                        content = displayContent,
+                        imageLoader = null,
+                        colors = markdownColors(text = Color.White, codeText = Color.Green, codeBackground = Color.Black)
                     )
                 }
 
