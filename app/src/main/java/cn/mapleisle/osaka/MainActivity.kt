@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
                 if (Settings.canDrawOverlays(context)) {
                     startService(Intent(context, OverlayService::class.java))
                     OverlayService.updateState("Recording")
-                    OverlayService.updateResult("正在录音中...")
+                    OverlayService.updateProcessingStatus("正在录音中...")
                     moveTaskToBack(true) // Minimize app
                 }
             }
