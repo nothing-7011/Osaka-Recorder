@@ -81,7 +81,7 @@ class ScreenCaptureService : Service() {
     private fun handleStopAndProcess() {
         stopRecordingResources()
         OverlayService.updateState("Ready")
-        OverlayService.updateResult("Recording saved, processing in background...")
+        OverlayService.updateProcessingStatus("Recording saved, processing in background...")
 
         val intent = Intent(this, ProcessingService::class.java).apply {
             action = ProcessingService.ACTION_ADD_TASK
