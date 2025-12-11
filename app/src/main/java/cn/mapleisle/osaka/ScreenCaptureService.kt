@@ -80,153 +80,20 @@ class ScreenCaptureService : Service() {
 
     private fun handleStopAndProcess() {
         stopRecordingResources()
-        OverlayService.updateState("Processing")
-        OverlayService.updateResult("录制完成，开始处理...")
+        OverlayService.updateState("Ready")
+        OverlayService.updateResult("Recording saved, processing in background...")
 
-        serviceScope.launch {
-            val pcmPath = currentFilePath
-            if (pcmPath != null) {
-                processFile(pcmPath)
-            } else {
-                withContext(Dispatchers.Main) {
-                    OverlayService.updateState("Error")
-                    OverlayService.updateResult("错误: 文件路径为空")
-                }
-                stopSelf()
-            }
+        val intent = Intent(this, ProcessingService::class.java).apply {
+            action = ProcessingService.ACTION_ADD_TASK
+            putExtra(ProcessingService.EXTRA_PCM_PATH, currentFilePath)
         }
-    }
-
-    private suspend fun processFile(pcmPath: String) {
-        try {
-            val pcmFile = File(pcmPath)
-            val wavPath = pcmFile.parent + "/final_audio.wav"
-            val wavFile = File(wavPath)
-            if (wavFile.exists()) wavFile.delete()
-
-            withContext(Dispatchers.Main) {
-                OverlayService.updateResult("正在转码 (PCM -> WAV)...")
-            }
-
-            val cmd = "-f s16le -ar 44100 -ac 2 -i \"$pcmPath\" \"$wavPath\""
-            val session = FFmpegKit.execute(cmd)
-
-            if (ReturnCode.isSuccess(session.returnCode)) {
-                if (pcmFile.exists()) pcmFile.delete()
-                uploadToApi(wavFile)
-            } else {
-                withContext(Dispatchers.Main) {
-                    OverlayService.updateState("Error")
-                    OverlayService.updateResult("转码失败: ${session.failStackTrace}")
-                }
-                stopSelf()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            stopSelf()
-        }
-    }
-
-    private suspend fun uploadToApi(audioFile: File) {
-        val config = ConfigManager(this).getConfigSnapshot()
-
-        // 自动修正 OpenAI URL 为 Gemini Native URL (防止用户填错)
-        val effectiveBaseUrl = if (config.baseUrl.contains("openai")) {
-            "https://generativelanguage.googleapis.com/v1beta/"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
         } else {
-            config.baseUrl
+            startService(intent)
         }
 
-        withContext(Dispatchers.Main) {
-            OverlayService.updateResult("正在上传到 ${config.model} ...")
-        }
-
-        try {
-            val audioBytes = audioFile.readBytes()
-            val base64Audio = Base64.encodeToString(audioBytes, Base64.NO_WRAP)
-
-            // ✅ 核心逻辑修正：System Prompt 拼接
-            // Gemini 的 contents 结构不支持 role: system。
-            // 我们把 System Prompt 加在文本提示词的前面，效果是一样的。
-            val finalPrompt = if (config.systemPrompt.isNotBlank()) {
-                "${config.systemPrompt}\n\n[Instruction]: Please listen to this audio carefully and provide a verbatim transcription."
-            } else {
-                "Please listen to this audio carefully and provide a verbatim transcription."
-            }
-
-            // ✅ 构造 Gemini 原生请求
-            val request = GeminiRequest(
-                contents = listOf(
-                    GeminiContent(
-                        role = "user",
-                        parts = listOf(
-                            // 1. 组合后的文本提示
-                            GeminiPart(text = finalPrompt),
-                            // 2. 音频数据
-                            GeminiPart(
-                                inline_data = GeminiBlob(
-                                    mime_type = "audio/wav",
-                                    data = base64Audio
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-
-            val apiService = NetworkClient.createService(effectiveBaseUrl, config.timeout, config.retry)
-
-            // 去掉 Bearer 前缀，Gemini 原生只需要 Key
-            val cleanKey = config.apiKey.replace("Bearer ", "").trim()
-
-            val response = apiService.generateContent(
-                model = config.model,
-                apiKey = cleanKey,
-                request = request
-            )
-
-            val candidate = response.candidates?.firstOrNull()
-            val resultText = candidate?.content?.parts
-                ?.mapNotNull { it.text } // 过滤掉没有 text 的 part
-                ?.joinToString("\n")     // 用换行符拼接
-                ?: "API 返回为空 (可能被拦截)"
-
-            // ✅ 保存历史记录
-            saveToHistory(resultText)
-
-            withContext(Dispatchers.Main) {
-                OverlayService.updateState("Done")
-                OverlayService.updateResult(resultText)
-            }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            withContext(Dispatchers.Main) {
-                OverlayService.updateState("Error")
-                val errorMsg = when {
-                    e.message?.contains("404") == true -> "404 错误: 路径不对 (请检查 BaseURL 是否为 Google 原生)"
-                    e.message?.contains("400") == true -> "400 错误: 参数错误 (可能是模型名填错)"
-                    else -> "API 错误: ${e.message}"
-                }
-                OverlayService.updateResult(errorMsg)
-            }
-        } finally {
-            stopSelf()
-        }
-    }
-
-    private fun saveToHistory(text: String) {
-        try {
-            val historyDir = File(getExternalFilesDir(null), "History")
-            if (!historyDir.exists()) historyDir.mkdirs()
-            val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
-            val filename = "Log_$timestamp.txt"
-            val file = File(historyDir, filename)
-            file.writeText(text)
-            Log.d("History", "Saved to ${file.absolutePath}")
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        stopSelf()
     }
 
     private fun startAudioCapture() {
