@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -21,6 +22,7 @@ import java.io.File
 @Composable
 fun HistoryScreen(onNavigateBack: () -> Unit) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     // State for file list
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
@@ -75,10 +77,13 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
                     }
                     items(files) { file ->
                         HistoryItem(file) {
-                            // Read content asynchronously too if files are large, but for now simple text reading is okay
-                            // or better, wrap it too
-                            selectedFileName = file.name
-                            selectedFileContent = file.readText()
+                            coroutineScope.launch(Dispatchers.IO) {
+                                val content = file.readText()
+                                withContext(Dispatchers.Main) {
+                                    selectedFileName = file.name
+                                    selectedFileContent = content
+                                }
+                            }
                         }
                         Divider()
                     }
