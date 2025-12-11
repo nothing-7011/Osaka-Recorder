@@ -1,0 +1,35 @@
+# --- Android Studio 自动生成文件 ---
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# --- App 编译产物 ---
+/app/build
+/app/release
+/app/*.apk
+
+# --- 密钥文件 (绝对不能上传！) ---
+*.jks
+*.keystore
+*.pem
+*.p12
+key.properties
+
+# --- 你的历史记录/临时录音文件 ---
+# 避免把你测试时的录音和 Log 传上去
+/app/src/main/assets/
+*.pcm
+*.wav
+*.mp3
