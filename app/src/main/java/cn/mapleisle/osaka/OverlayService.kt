@@ -37,9 +37,11 @@ import androidx.savedstate.SavedStateRegistryOwner
 // 使用扩展函数
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import android.widget.TextView
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import cn.mapleisle.osaka.data.HistoryManager
-import com.mikepenz.markdown.m3.Markdown
+import io.noties.markwon.Markwon
 import java.io.File
 
 class OverlayService : LifecycleService() {
@@ -231,11 +233,17 @@ class OverlayService : LifecycleService() {
                         .padding(8.dp)
                         .verticalScroll(scrollState)
                 ) {
-                    // Use simple Text if Markdown causes issues in preview or context
-                    Markdown(
-                        content = displayContent,
-                        imageLoader = null,
-                        colors = markdownColors(text = Color.White, codeText = Color.Green, codeBackground = Color.Black)
+                    AndroidView(
+                        factory = { ctx ->
+                            TextView(ctx).apply {
+                                setTextColor(android.graphics.Color.WHITE)
+                                textSize = 13f
+                            }
+                        },
+                        update = { textView ->
+                            val markwon = Markwon.create(textView.context)
+                            markwon.setMarkdown(textView, displayContent)
+                        }
                     )
                 }
 
