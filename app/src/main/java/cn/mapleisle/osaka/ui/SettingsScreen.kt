@@ -7,6 +7,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import cn.mapleisle.osaka.data.ConfigManager
 
@@ -29,6 +32,7 @@ fun SettingsScreen(
     // State wrappers for saving
     var baseUrl by remember { mutableStateOf(configManager.baseUrl) }
     var apiKey by remember { mutableStateOf(configManager.apiKey) }
+    var isApiKeyVisible by remember { mutableStateOf(false) }
     var modelName by remember { mutableStateOf(configManager.modelName) }
     var timeout by remember { mutableStateOf(configManager.timeout.toString()) }
     var retry by remember { mutableStateOf(configManager.retry.toString()) }
@@ -123,8 +127,20 @@ fun SettingsScreen(
                 onValueChange = { apiKey = it },
                 label = { Text("API Key") },
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    val image = if (isApiKeyVisible)
+                        Icons.Filled.Visibility
+                    else
+                        Icons.Filled.VisibilityOff
+
+                    val description = if (isApiKeyVisible) "Hide password" else "Show password"
+
+                    IconButton(onClick = { isApiKeyVisible = !isApiKeyVisible }) {
+                        Icon(imageVector = image, contentDescription = description)
+                    }
+                }
             )
 
             OutlinedTextField(
