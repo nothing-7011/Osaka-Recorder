@@ -9,16 +9,21 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,9 +133,46 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
 
 @Composable
 fun HistoryItem(file: File, onClick: () -> Unit) {
+    val lastModified = file.lastModified()
+    val formattedDate = remember(lastModified) {
+        val date = Date(lastModified)
+        val format = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+        format.format(date)
+    }
+
+    val length = file.length()
+    val formattedSize = remember(length) {
+        val kb = length / 1024
+        if (kb > 1024) {
+            String.format(Locale.getDefault(), "%.1f MB", kb / 1024f)
+        } else {
+            "$kb KB"
+        }
+    }
+
     ListItem(
-        headlineContent = { Text(file.name) },
-        supportingContent = { Text("${file.length() / 1024} KB") },
+        headlineContent = {
+            Text(
+                text = file.name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        },
+        supportingContent = {
+            Text(
+                text = "$formattedDate • $formattedSize",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        trailingContent = {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowRight,
+                contentDescription = null, // Decorative, interaction is on the row
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
         modifier = Modifier.clickable(onClick = onClick)
     )
 }
