@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -119,7 +120,8 @@ fun SettingsScreen(
                 value = baseUrl,
                 onValueChange = { baseUrl = it },
                 label = { Text("Base URL") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next)
             )
 
             OutlinedTextField(
@@ -128,7 +130,7 @@ fun SettingsScreen(
                 label = { Text("API Key") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
                 trailingIcon = {
                     val image = if (isApiKeyVisible)
                         Icons.Filled.Visibility
@@ -147,7 +149,8 @@ fun SettingsScreen(
                 value = modelName,
                 onValueChange = { modelName = it },
                 label = { Text("Model Name") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -156,14 +159,16 @@ fun SettingsScreen(
                     onValueChange = { if (it.all { c -> c.isDigit() }) timeout = it },
                     label = { Text("Timeout (s)") },
                     modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                    placeholder = { Text("30") }
                 )
                 OutlinedTextField(
                     value = retry,
                     onValueChange = { if (it.all { c -> c.isDigit() }) retry = it },
                     label = { Text("Retry Count") },
                     modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                    placeholder = { Text("3") }
                 )
             }
 
