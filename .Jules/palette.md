@@ -5,3 +5,7 @@
 ## 2024-05-24 - [Keyboard Navigation in Forms]
 **Learning:** On mobile devices, manually tapping each field in a form is tedious. Users expect the "Next" button on the soft keyboard to advance focus automatically.
 **Action:** Always configure `KeyboardOptions` with `ImeAction.Next` for intermediate form fields and `ImeAction.Done` (or default) for the last field. Use `KeyboardType` (e.g., Uri, Number) to show the most relevant keyboard layout.
+
+## 2025-05-27 - [Services and Theming Context]
+**Learning:** Composable UI running within a `Service` (via `ComposeView` and `WindowManager`) does not have an Activity context. Accessing `LocalView.current` for `Window` operations (common in standard Theme templates) causes a crash.
+**Action:** For UI overlay services, create a local, simplified `MaterialTheme` wrapper or manually pass colors, avoiding the standard app-wide Theme if it relies on Activity-specific side effects like status bar coloring.

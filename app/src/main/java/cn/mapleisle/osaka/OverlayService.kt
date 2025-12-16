@@ -133,154 +133,164 @@ class OverlayService : LifecycleService() {
             }
         }
 
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xEE222222)), // Slightly more opaque
-            modifier = Modifier
-                .width(320.dp) // Wider for markdown
-                .wrapContentHeight()
-                .padding(8.dp)
-                .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        change.consume()
-                        val params = overlayView.layoutParams as WindowManager.LayoutParams
-                        params.x += dragAmount.x.toInt()
-                        params.y += dragAmount.y.toInt()
-                        windowManager.updateViewLayout(overlayView, params)
-                    }
-                }
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                // Top Bar: Status + Close
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    val statusColor = when {
-                        appState.value == "Recording" -> Color.Red
-                        processingStatus.value.isNotEmpty() && processingStatus.value != "Done" -> Color.Yellow
-                        else -> Color.Green
-                    }
-                    Box(modifier = Modifier.size(10.dp).background(statusColor, RoundedCornerShape(50)))
-                    Spacer(modifier = Modifier.width(8.dp))
+        // Define consistent colors locally for the Service context
+        val overlayColors = darkColorScheme(
+            primary = Color(0xFFD0BCFF),
+            secondary = Color(0xFFCCC2DC),
+            tertiary = Color(0xFFEFB8C8),
+            error = Color(0xFFB3261E)
+        )
 
-                    val statusText = if (appState.value == "Recording") "Recording"
-                                     else if (processingStatus.value.isNotEmpty() && processingStatus.value != "Done") processingStatus.value
-                                     else "Ready"
-
-                    Text(text = statusText, color = Color.White, fontSize = 12.sp, modifier = Modifier.weight(1f))
-
-                    IconButton(onClick = { stopSelf() }, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.Close, "Close", tint = Color.LightGray)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Control Bar: History Selector
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().height(40.dp)
-                ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        OutlinedButton(
-                            onClick = {
-                                showHistoryDropdown = true
-                                hasNewResult.value = false // Clear dot on open
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                        ) {
-                             Text(
-                                text = currentDisplayedFile.value?.name ?: "Select History",
-                                maxLines = 1,
-                                fontSize = 12.sp,
-                                modifier = Modifier.weight(1f)
-                            )
-                            if (hasNewResult.value) {
-                                Icon(Icons.Default.Notifications, contentDescription = "New", tint = Color.Red, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                            }
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+        MaterialTheme(colorScheme = overlayColors) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xEE222222)), // Slightly more opaque
+                modifier = Modifier
+                    .width(320.dp) // Wider for markdown
+                    .wrapContentHeight()
+                    .padding(8.dp)
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            change.consume()
+                            val params = overlayView.layoutParams as WindowManager.LayoutParams
+                            params.x += dragAmount.x.toInt()
+                            params.y += dragAmount.y.toInt()
+                            windowManager.updateViewLayout(overlayView, params)
                         }
+                    }
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    // Top Bar: Status + Close
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val statusColor = when {
+                            appState.value == "Recording" -> MaterialTheme.colorScheme.error
+                            processingStatus.value.isNotEmpty() && processingStatus.value != "Done" -> Color.Yellow
+                            else -> Color.Green
+                        }
+                        Box(modifier = Modifier.size(10.dp).background(statusColor, RoundedCornerShape(50)))
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                        DropdownMenu(
-                            expanded = showHistoryDropdown,
-                            onDismissRequest = { showHistoryDropdown = false },
-                            modifier = Modifier.background(Color(0xFF333333)).heightIn(max = 200.dp)
-                        ) {
-                            historyFiles.forEach { file ->
-                                DropdownMenuItem(
-                                    text = { Text(file.name, color = Color.White, fontSize = 12.sp) },
-                                    onClick = {
-                                        currentDisplayedFile.value = file
-                                        showHistoryDropdown = false
-                                    }
+                        val statusText = if (appState.value == "Recording") "Recording"
+                                         else if (processingStatus.value.isNotEmpty() && processingStatus.value != "Done") processingStatus.value
+                                         else "Ready"
+
+                        Text(text = statusText, color = Color.White, fontSize = 12.sp, modifier = Modifier.weight(1f))
+
+                        IconButton(onClick = { stopSelf() }, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Default.Close, "关闭悬浮窗", tint = Color.LightGray)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Control Bar: History Selector
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth().height(40.dp)
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            OutlinedButton(
+                                onClick = {
+                                    showHistoryDropdown = true
+                                    hasNewResult.value = false // Clear dot on open
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                            ) {
+                                 Text(
+                                    text = currentDisplayedFile.value?.name ?: "Select History",
+                                    maxLines = 1,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.weight(1f)
                                 )
+                                if (hasNewResult.value) {
+                                    Icon(Icons.Default.Notifications, contentDescription = "新结果可用", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                }
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = "选择历史记录")
+                            }
+
+                            DropdownMenu(
+                                expanded = showHistoryDropdown,
+                                onDismissRequest = { showHistoryDropdown = false },
+                                modifier = Modifier.background(Color(0xFF333333)).heightIn(max = 200.dp)
+                            ) {
+                                historyFiles.forEach { file ->
+                                    DropdownMenuItem(
+                                        text = { Text(file.name, color = Color.White, fontSize = 12.sp) },
+                                        onClick = {
+                                            currentDisplayedFile.value = file
+                                            showHistoryDropdown = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                // Content Area: Markdown
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 100.dp, max = 300.dp)
-                        .background(Color(0x66000000), RoundedCornerShape(8.dp))
-                        .padding(8.dp)
-                        .verticalScroll(scrollState)
-                ) {
-                    AndroidView(
-                        factory = { ctx ->
-                            TextView(ctx).apply {
-                                setTextColor(android.graphics.Color.WHITE)
-                                textSize = 13f
+                    // Content Area: Markdown
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 100.dp, max = 300.dp)
+                            .background(Color(0x66000000), RoundedCornerShape(8.dp))
+                            .padding(8.dp)
+                            .verticalScroll(scrollState)
+                    ) {
+                        AndroidView(
+                            factory = { ctx ->
+                                TextView(ctx).apply {
+                                    setTextColor(android.graphics.Color.WHITE)
+                                    textSize = 13f
+                                }
+                            },
+                            update = { textView ->
+                                val markwon = Markwon.create(textView.context)
+                                markwon.setMarkdown(textView, displayContent)
                             }
-                        },
-                        update = { textView ->
-                            val markwon = Markwon.create(textView.context)
-                            markwon.setMarkdown(textView, displayContent)
-                        }
-                    )
-                }
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    if (appState.value == "Recording") {
-                        Button(
-                            onClick = {
-                                val intent = Intent(this@OverlayService, ScreenCaptureService::class.java)
-                                intent.action = ScreenCaptureService.ACTION_STOP_COMMAND
-                                startService(intent)
-                                updateState("Stopping...")
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("停止录音")
-                        }
-                    } else {
-                        Button(
-                            onClick = {
-                                val intent = Intent(this@OverlayService, MainActivity::class.java)
-                                // ✅ 核心修改：加上暗号
-                                intent.action = MainActivity.ACTION_AUTO_START
-                                // 必须加这个 Flag 才能从 Service 启动 Activity
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                // 如果 Activity 已经在后台，直接复用它，不要新建
-                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                                startActivity(intent)
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("新录音")
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        if (appState.value == "Recording") {
+                            Button(
+                                onClick = {
+                                    val intent = Intent(this@OverlayService, ScreenCaptureService::class.java)
+                                    intent.action = ScreenCaptureService.ACTION_STOP_COMMAND
+                                    startService(intent)
+                                    updateState("Stopping...")
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("停止录音")
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    val intent = Intent(this@OverlayService, MainActivity::class.java)
+                                    // ✅ 核心修改：加上暗号
+                                    intent.action = MainActivity.ACTION_AUTO_START
+                                    // 必须加这个 Flag 才能从 Service 启动 Activity
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    // 如果 Activity 已经在后台，直接复用它，不要新建
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                    startActivity(intent)
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("新录音")
+                            }
                         }
                     }
                 }
