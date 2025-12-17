@@ -170,7 +170,7 @@ class OverlayService : LifecycleService() {
 
                     Text(text = statusText, color = Color.White, fontSize = 12.sp, modifier = Modifier.weight(1f))
 
-                    IconButton(onClick = { stopSelf() }, modifier = Modifier.size(24.dp)) {
+                    IconButton(onClick = { stopSelf() }) {
                         Icon(Icons.Default.Close, "Close", tint = Color.LightGray)
                     }
                 }
