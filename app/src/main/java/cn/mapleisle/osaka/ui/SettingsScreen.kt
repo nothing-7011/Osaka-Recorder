@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import cn.mapleisle.osaka.data.ConfigManager
@@ -179,7 +180,11 @@ fun SettingsScreen(
                 onValueChange = { systemPrompt = it },
                 label = { Text("System Prompt") },
                 modifier = Modifier.fillMaxWidth().height(120.dp),
-                maxLines = 5
+                maxLines = 5,
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Default
+                )
             )
         }
     }

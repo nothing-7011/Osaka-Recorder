@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -15,6 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +65,10 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
                             onNavigateBack()
                         }
                     }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = if (selectedFileContent != null) "Close details" else "Navigate back"
+                        )
                     }
                 }
             )
@@ -71,7 +77,9 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
         if (selectedFileContent == null) {
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(
+                        modifier = Modifier.semantics { contentDescription = "Loading history" }
+                    )
                 }
             } else if (files.isEmpty()) {
                 Box(
@@ -125,7 +133,9 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                Text(selectedFileContent ?: "")
+                SelectionContainer {
+                    Text(selectedFileContent ?: "")
+                }
             }
         }
     }
