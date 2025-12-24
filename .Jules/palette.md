@@ -13,3 +13,7 @@
 ## 2024-05-25 - [Dynamic Accessibility Descriptions]
 **Learning:** Static content descriptions for buttons that change function (like a "Back" button becoming a "Close" button in a detail view) are confusing for screen reader users.
 **Action:** Use conditional logic to update `contentDescription` dynamically when the UI state changes the button's purpose, ensuring the description matches the current action.
+
+## 2024-05-27 - [Live Regions for Status Updates]
+**Learning:** Visual text updates (like "Recording..." appearing) are invisible to screen readers unless explicitly announced. Users relying on TalkBack may miss critical state changes.
+**Action:** Use `Modifier.semantics { liveRegion = LiveRegionMode.Polite }` on Text composables that display dynamic status updates to ensure they are announced automatically.
