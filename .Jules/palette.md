@@ -13,3 +13,7 @@
 ## 2024-05-25 - [Dynamic Accessibility Descriptions]
 **Learning:** Static content descriptions for buttons that change function (like a "Back" button becoming a "Close" button in a detail view) are confusing for screen reader users.
 **Action:** Use conditional logic to update `contentDescription` dynamically when the UI state changes the button's purpose, ensuring the description matches the current action.
+
+## 2024-05-28 - [Clear Actions for Long Inputs]
+**Learning:** Editing long configuration strings (like URLs or API keys) on mobile is frustrating without a quick way to clear the field.
+**Action:** Add a "Clear" icon button as a `trailingIcon` to long text input fields (e.g., URLs, Prompts) that only appears when the field is not empty.
