@@ -123,7 +123,8 @@ fun SettingsScreen(
                 onValueChange = { baseUrl = it },
                 label = { Text("Base URL") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next),
+                placeholder = { Text("https://api.openai.com/v1") }
             )
 
             OutlinedTextField(
@@ -133,6 +134,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+                placeholder = { Text("sk-...") },
                 trailingIcon = {
                     val image = if (isApiKeyVisible)
                         Icons.Filled.Visibility
@@ -152,7 +154,8 @@ fun SettingsScreen(
                 onValueChange = { modelName = it },
                 label = { Text("Model Name") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                placeholder = { Text("gpt-4o") }
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -185,7 +188,8 @@ fun SettingsScreen(
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Default
-                )
+                ),
+                placeholder = { Text("You are a helpful assistant.") }
             )
         }
     }
