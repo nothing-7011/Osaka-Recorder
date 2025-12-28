@@ -7,6 +7,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -122,8 +123,19 @@ fun SettingsScreen(
                 value = baseUrl,
                 onValueChange = { baseUrl = it },
                 label = { Text("Base URL") },
+                placeholder = { Text("https://api.openai.com/v1") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next),
+                trailingIcon = if (baseUrl.isNotEmpty()) {
+                    {
+                        IconButton(onClick = { baseUrl = "" }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Clear Base URL"
+                            )
+                        }
+                    }
+                } else null
             )
 
             OutlinedTextField(
@@ -151,8 +163,19 @@ fun SettingsScreen(
                 value = modelName,
                 onValueChange = { modelName = it },
                 label = { Text("Model Name") },
+                placeholder = { Text("gpt-4o") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                trailingIcon = if (modelName.isNotEmpty()) {
+                    {
+                        IconButton(onClick = { modelName = "" }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Clear Model Name"
+                            )
+                        }
+                    }
+                } else null
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
