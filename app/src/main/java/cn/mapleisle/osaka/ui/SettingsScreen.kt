@@ -208,7 +208,17 @@ fun SettingsScreen(
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Default
-                )
+                ),
+                trailingIcon = if (systemPrompt.isNotEmpty()) {
+                    {
+                        IconButton(onClick = { systemPrompt = "" }) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Clear System Prompt"
+                            )
+                        }
+                    }
+                } else null
             )
         }
     }
