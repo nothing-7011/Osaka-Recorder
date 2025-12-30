@@ -13,3 +13,7 @@
 ## 2024-05-25 - [Dynamic Accessibility Descriptions]
 **Learning:** Static content descriptions for buttons that change function (like a "Back" button becoming a "Close" button in a detail view) are confusing for screen reader users.
 **Action:** Use conditional logic to update `contentDescription` dynamically when the UI state changes the button's purpose, ensuring the description matches the current action.
+
+## 2024-05-26 - [Feedback for Invisible Actions]
+**Learning:** Actions like "Copy to Clipboard" are invisible to the user. Without explicit feedback, users are unsure if the action succeeded.
+**Action:** Always pair invisible system actions (copy, save, sync) with a `Snackbar` or visible toast confirmation to provide immediate reassurance.
