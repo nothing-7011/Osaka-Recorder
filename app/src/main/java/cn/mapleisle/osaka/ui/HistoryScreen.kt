@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cn.mapleisle.osaka.data.HistoryManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,6 +53,22 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
             }
         }
         isLoading = false
+    }
+
+    // Palette UX Improvement: Live updates for history
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            HistoryManager.historyUpdates.collect { newFile ->
+                // Perform file operations and sorting on IO dispatcher
+                val updatedList = (listOf(newFile) + files)
+                    .distinctBy { it.absolutePath }
+                    .sortedByDescending { it.lastModified() }
+                // Update state on Main dispatcher
+                withContext(Dispatchers.Main) {
+                    files = updatedList
+                }
+            }
+        }
     }
 
     var selectedFileContent by remember { mutableStateOf<String?>(null) }
