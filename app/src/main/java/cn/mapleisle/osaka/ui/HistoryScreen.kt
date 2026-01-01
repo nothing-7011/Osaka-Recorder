@@ -9,15 +9,18 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +36,8 @@ import java.util.Locale
 fun HistoryScreen(onNavigateBack: () -> Unit) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val clipboardManager = LocalClipboardManager.current
 
     // State for file list
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
@@ -70,9 +75,27 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
                             contentDescription = if (selectedFileContent != null) "Close details" else "Navigate back"
                         )
                     }
+                },
+                actions = {
+                    if (selectedFileContent != null) {
+                        IconButton(onClick = {
+                            selectedFileContent?.let { content ->
+                                clipboardManager.setText(AnnotatedString(content))
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar("Content copied to clipboard")
+                                }
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy content"
+                            )
+                        }
+                    }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         if (selectedFileContent == null) {
             if (isLoading) {
