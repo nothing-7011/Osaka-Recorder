@@ -1,4 +1,4 @@
-# Osaka Recorder (大阪录音姬) 🎙️
+# Osaka Recorder
 
 一个基于 Android 的悬浮窗实时录音与 AI 转写工具。支持系统内录，并使用 Gemini/OpenAI 模型进行实时转写。
 
