@@ -9,15 +9,18 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +36,8 @@ import java.util.Locale
 fun HistoryScreen(onNavigateBack: () -> Unit) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val clipboardManager = LocalClipboardManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // State for file list
     var files by remember { mutableStateOf<List<File>>(emptyList()) }
@@ -53,6 +58,7 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
     var selectedFileName by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(if (selectedFileContent == null) "History" else selectedFileName ?: "Details") },
@@ -69,6 +75,21 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
                             imageVector = Icons.Default.ArrowBack,
                             contentDescription = if (selectedFileContent != null) "Close details" else "Navigate back"
                         )
+                    }
+                },
+                actions = {
+                    if (selectedFileContent != null) {
+                        IconButton(onClick = {
+                            clipboardManager.setText(AnnotatedString(selectedFileContent!!))
+                            coroutineScope.launch {
+                                snackbarHostState.showSnackbar("Copied to clipboard")
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.ContentCopy,
+                                contentDescription = "Copy content"
+                            )
+                        }
                     }
                 }
             )
