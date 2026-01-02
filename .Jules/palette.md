@@ -17,3 +17,7 @@
 ## 2024-05-28 - [Real-time Data Consistency]
 **Learning:** Users expect the "History" screen to reflect new recordings immediately without manual refresh or re-navigation, especially when background services are generating data.
 **Action:** Use `SharedFlow` or similar reactive streams to broadcast data updates from background services and observe them in UI screens (`LaunchedEffect` with `.collect`) to ensure the view is always consistent with the latest state.
+
+## 2024-06-01 - [Form Validation Feedback]
+**Learning:** Users are more confident filling out technical forms (like API settings) when default values and required fields are explicitly marked with helper text.
+**Action:** Use `supportingText` in `OutlinedTextField` to show default values for optional fields and validation errors for required fields.
