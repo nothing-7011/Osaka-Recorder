@@ -142,6 +142,7 @@ fun SettingsScreen(
                 value = apiKey,
                 onValueChange = { apiKey = it },
                 label = { Text("API Key") },
+                supportingText = { Text("Required for transcription services") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (isApiKeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
@@ -183,6 +184,7 @@ fun SettingsScreen(
                     value = timeout,
                     onValueChange = { if (it.all { c -> c.isDigit() }) timeout = it },
                     label = { Text("Timeout (s)") },
+                    supportingText = { Text("Default: 30s") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     placeholder = { Text("30") }
@@ -191,6 +193,7 @@ fun SettingsScreen(
                     value = retry,
                     onValueChange = { if (it.all { c -> c.isDigit() }) retry = it },
                     label = { Text("Retry Count") },
+                    supportingText = { Text("Default: 3") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     placeholder = { Text("3") }

@@ -17,3 +17,7 @@
 ## 2024-05-28 - [Real-time Data Consistency]
 **Learning:** Users expect the "History" screen to reflect new recordings immediately without manual refresh or re-navigation, especially when background services are generating data.
 **Action:** Use `SharedFlow` or similar reactive streams to broadcast data updates from background services and observe them in UI screens (`LaunchedEffect` with `.collect`) to ensure the view is always consistent with the latest state.
+
+## 2024-06-03 - [Helper Text vs Placeholders]
+**Learning:** Placeholder text disappears on input, making it poor for persistent guidance like default values or required field indicators.
+**Action:** Use `supportingText` in Material 3 text fields to display critical context (like default values or "Required") that needs to remain visible during typing.
