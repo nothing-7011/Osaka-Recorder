@@ -179,21 +179,32 @@ fun SettingsScreen(
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val timeoutValue = timeout.toLongOrNull()
+                val isTimeoutError = timeout.isNotEmpty() && (timeoutValue == null || timeoutValue < 1 || timeoutValue > 300)
+
                 OutlinedTextField(
                     value = timeout,
                     onValueChange = { if (it.all { c -> c.isDigit() }) timeout = it },
                     label = { Text("Timeout (s)") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                    placeholder = { Text("30") }
+                    placeholder = { Text("30") },
+                    supportingText = { Text(if (isTimeoutError) "1-300s" else "Default: 30s") },
+                    isError = isTimeoutError
                 )
+
+                val retryValue = retry.toIntOrNull()
+                val isRetryError = retry.isNotEmpty() && (retryValue == null || retryValue < 0 || retryValue > 10)
+
                 OutlinedTextField(
                     value = retry,
                     onValueChange = { if (it.all { c -> c.isDigit() }) retry = it },
                     label = { Text("Retry Count") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
-                    placeholder = { Text("3") }
+                    placeholder = { Text("3") },
+                    supportingText = { Text(if (isRetryError) "0-10" else "Default: 3") },
+                    isError = isRetryError
                 )
             }
 
