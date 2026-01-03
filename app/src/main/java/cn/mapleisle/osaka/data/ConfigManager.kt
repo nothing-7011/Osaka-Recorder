@@ -26,7 +26,7 @@ class ConfigManager(context: Context) {
 
     // Base URL
     var baseUrl: String
-        get() = prefs.getString(KEY_BASE_URL, "https://generativelanguage.googleapis.com/v1beta/openai/") ?: ""
+        get() = prefs.getString(KEY_BASE_URL, "https://generativelanguage.googleapis.com/v1beta") ?: ""
         set(value) = prefs.edit().putString(KEY_BASE_URL, value).apply()
 
     // API Key

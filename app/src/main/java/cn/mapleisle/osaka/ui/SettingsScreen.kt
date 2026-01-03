@@ -123,7 +123,7 @@ fun SettingsScreen(
                 value = baseUrl,
                 onValueChange = { baseUrl = it },
                 label = { Text("Base URL") },
-                placeholder = { Text("https://api.openai.com/v1") },
+                placeholder = { Text("https://generativelanguage.googleapis.com/v1beta") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Next),
                 trailingIcon = if (baseUrl.isNotEmpty()) {
