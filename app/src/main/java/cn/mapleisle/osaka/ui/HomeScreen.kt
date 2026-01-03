@@ -16,6 +16,8 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,8 +58,11 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
+            val haptic = LocalHapticFeedback.current
+
             Button(
                 onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (isRecording) onStopRecording() else onStartRecording()
                 },
                 modifier = Modifier.size(160.dp),
