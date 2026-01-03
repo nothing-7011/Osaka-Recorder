@@ -17,3 +17,7 @@
 ## 2024-05-28 - [Real-time Data Consistency]
 **Learning:** Users expect the "History" screen to reflect new recordings immediately without manual refresh or re-navigation, especially when background services are generating data.
 **Action:** Use `SharedFlow` or similar reactive streams to broadcast data updates from background services and observe them in UI screens (`LaunchedEffect` with `.collect`) to ensure the view is always consistent with the latest state.
+
+## 2024-05-29 - [Inline Validation Guidance]
+**Learning:** Users prefer validation rules to be visible upfront (e.g., "Range: 1-300s") rather than discovering them only after triggering an error state.
+**Action:** Use `supportingText` in `OutlinedTextField` to display default values and validation ranges, combining it with `isError` for visual feedback when limits are violated.
