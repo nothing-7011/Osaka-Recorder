@@ -21,3 +21,6 @@
 ## 2024-05-29 - [Inline Validation Guidance]
 **Learning:** Users prefer validation rules to be visible upfront (e.g., "Range: 1-300s") rather than discovering them only after triggering an error state.
 **Action:** Use `supportingText` in `OutlinedTextField` to display default values and validation ranges, combining it with `isError` for visual feedback when limits are violated.
+## 2024-05-30 - [Tactile Confirmation for Primary Actions]
+**Learning:** For primary actions that toggle significant states (like starting/stopping a recording), visual feedback alone may be insufficient in dynamic environments. Tactile feedback provides immediate physical confirmation.
+**Action:** Use `LocalHapticFeedback.current.performHapticFeedback(HapticFeedbackType.LongPress)` for primary toggle buttons to enhance the user's sense of control and confirmation.
