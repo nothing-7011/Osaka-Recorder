@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -26,13 +28,15 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToHistory: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Osaka Recorder") },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
                     }
                 }
             )
@@ -58,6 +62,7 @@ fun HomeScreen(
 
             Button(
                 onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (isRecording) onStopRecording() else onStartRecording()
                 },
                 modifier = Modifier.size(160.dp),
@@ -67,7 +72,7 @@ fun HomeScreen(
                 )
             ) {
                 Icon(
-                    imageVector = if (isRecording) Icons.Default.MicOff else Icons.Default.Mic,
+                    imageVector = if (isRecording) Icons.Filled.MicOff else Icons.Filled.Mic,
                     contentDescription = if (isRecording) "Stop" else "Record",
                     modifier = Modifier.size(64.dp)
                 )
@@ -79,7 +84,7 @@ fun HomeScreen(
                 onClick = onNavigateToHistory,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(Icons.Default.History, contentDescription = null)
+                Icon(Icons.Filled.History, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("View History")
             }
