@@ -22,8 +22,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -102,6 +104,7 @@ class OverlayService : LifecycleService() {
 
     @Composable
     fun OverlayUI() {
+        val haptic = LocalHapticFeedback.current
         val scrollState = rememberScrollState()
         val historyFiles = remember { mutableStateListOf<File>() }
         var showHistoryDropdown by remember { mutableStateOf(false) }
@@ -253,6 +256,7 @@ class OverlayService : LifecycleService() {
                     if (appState.value == "Recording") {
                         Button(
                             onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 val intent = Intent(this@OverlayService, ScreenCaptureService::class.java)
                                 intent.action = ScreenCaptureService.ACTION_STOP_COMMAND
                                 startService(intent)
@@ -266,6 +270,7 @@ class OverlayService : LifecycleService() {
                     } else {
                         Button(
                             onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 val intent = Intent(this@OverlayService, MainActivity::class.java)
                                 // ✅ 核心修改：加上暗号
                                 intent.action = MainActivity.ACTION_AUTO_START
