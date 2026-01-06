@@ -51,8 +51,8 @@ fun SettingsScreen(
         configManager.baseUrl = baseUrl
         configManager.apiKey = apiKey
         configManager.modelName = modelName
-        configManager.timeout = timeout.toLongOrNull() ?: 30L
-        configManager.retry = retry.toIntOrNull() ?: 3
+        configManager.timeout = (timeout.toLongOrNull() ?: 30L).coerceIn(1L, 300L)
+        configManager.retry = (retry.toIntOrNull() ?: 3).coerceIn(0, 10)
         configManager.systemPrompt = systemPrompt
         configManager.themeMode = themeMode
     }
@@ -189,7 +189,12 @@ fun SettingsScreen(
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     placeholder = { Text("30") },
-                    supportingText = { Text(if (isTimeoutError) "1-300s" else "Default: 30s") },
+                    supportingText = {
+                        Text(
+                            text = if (isTimeoutError) "1-300s" else "Default: 30s",
+                            color = if (isTimeoutError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     isError = isTimeoutError
                 )
 
@@ -203,7 +208,12 @@ fun SettingsScreen(
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     placeholder = { Text("3") },
-                    supportingText = { Text(if (isRetryError) "0-10" else "Default: 3") },
+                    supportingText = {
+                        Text(
+                            text = if (isRetryError) "0-10" else "Default: 3",
+                            color = if (isRetryError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     isError = isRetryError
                 )
             }
