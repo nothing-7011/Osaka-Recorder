@@ -22,6 +22,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import cn.mapleisle.osaka.data.ConfigManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +89,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            Text("Interface", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            Text("Interface", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.semantics { heading() })
 
             // Theme Selector
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -117,7 +119,7 @@ fun SettingsScreen(
                 }
             }
 
-            Text("API Configuration", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            Text("API Configuration", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.semantics { heading() })
 
             OutlinedTextField(
                 value = baseUrl,
@@ -208,13 +210,14 @@ fun SettingsScreen(
                 )
             }
 
-            Text("Prompt Engineering", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            Text("Prompt Engineering", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.semantics { heading() })
 
             OutlinedTextField(
                 value = systemPrompt,
                 onValueChange = { systemPrompt = it },
                 label = { Text("System Prompt") },
-                modifier = Modifier.fillMaxWidth().height(120.dp),
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
                 maxLines = 5,
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
