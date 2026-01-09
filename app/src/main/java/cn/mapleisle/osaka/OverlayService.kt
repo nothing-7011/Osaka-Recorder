@@ -153,12 +153,22 @@ class OverlayService : LifecycleService() {
                     }
                 }
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                // Top Bar: Status + Close
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Drag Handle
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .width(32.dp)
+                        .height(4.dp)
+                        .background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+                )
+
+                Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
+                    // Top Bar: Status + Close
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                     val statusColor = when {
                         appState.value == "Recording" -> Color.Red
                         processingStatus.value.isNotEmpty() && processingStatus.value != "Done" -> Color.Yellow
@@ -173,14 +183,14 @@ class OverlayService : LifecycleService() {
 
                     Text(text = statusText, color = Color.White, fontSize = 12.sp, modifier = Modifier.weight(1f))
 
-                    IconButton(onClick = { stopSelf() }) {
-                        Icon(Icons.Default.Close, "Close", tint = Color.LightGray)
+                        IconButton(onClick = { stopSelf() }) {
+                            Icon(Icons.Default.Close, "Close", tint = Color.LightGray)
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                // Control Bar: History Selector
+                    // Control Bar: History Selector
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().height(40.dp)
@@ -227,65 +237,66 @@ class OverlayService : LifecycleService() {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Content Area: Markdown
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 100.dp, max = 300.dp)
-                        .background(Color(0x66000000), RoundedCornerShape(8.dp))
-                        .padding(8.dp)
-                        .verticalScroll(scrollState)
-                ) {
-                    AndroidView(
-                        factory = { ctx ->
-                            TextView(ctx).apply {
-                                setTextColor(android.graphics.Color.WHITE)
-                                textSize = 13f
+                    // Content Area: Markdown
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 100.dp, max = 300.dp)
+                            .background(Color(0x66000000), RoundedCornerShape(8.dp))
+                            .padding(8.dp)
+                            .verticalScroll(scrollState)
+                    ) {
+                        AndroidView(
+                            factory = { ctx ->
+                                TextView(ctx).apply {
+                                    setTextColor(android.graphics.Color.WHITE)
+                                    textSize = 13f
+                                }
+                            },
+                            update = { textView ->
+                                val markwon = Markwon.create(textView.context)
+                                markwon.setMarkdown(textView, displayContent)
                             }
-                        },
-                        update = { textView ->
-                            val markwon = Markwon.create(textView.context)
-                            markwon.setMarkdown(textView, displayContent)
-                        }
-                    )
-                }
+                        )
+                    }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    if (appState.value == "Recording") {
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                val intent = Intent(this@OverlayService, ScreenCaptureService::class.java)
-                                intent.action = ScreenCaptureService.ACTION_STOP_COMMAND
-                                startService(intent)
-                                updateState("Stopping...")
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("停止录音")
-                        }
-                    } else {
-                        Button(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                val intent = Intent(this@OverlayService, MainActivity::class.java)
-                                // ✅ 核心修改：加上暗号
-                                intent.action = MainActivity.ACTION_AUTO_START
-                                // 必须加这个 Flag 才能从 Service 启动 Activity
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                // 如果 Activity 已经在后台，直接复用它，不要新建
-                                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                                startActivity(intent)
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("新录音")
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        if (appState.value == "Recording") {
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    val intent = Intent(this@OverlayService, ScreenCaptureService::class.java)
+                                    intent.action = ScreenCaptureService.ACTION_STOP_COMMAND
+                                    startService(intent)
+                                    updateState("Stopping...")
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("停止录音")
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    val intent = Intent(this@OverlayService, MainActivity::class.java)
+                                    // ✅ 核心修改：加上暗号
+                                    intent.action = MainActivity.ACTION_AUTO_START
+                                    // 必须加这个 Flag 才能从 Service 启动 Activity
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    // 如果 Activity 已经在后台，直接复用它，不要新建
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                    startActivity(intent)
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("新录音")
+                            }
                         }
                     }
                 }
