@@ -154,6 +154,16 @@ class OverlayService : LifecycleService() {
                 }
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
+                // Drag Handle
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(32.dp)
+                        .height(4.dp)
+                        .background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(50))
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
                 // Top Bar: Status + Close
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
