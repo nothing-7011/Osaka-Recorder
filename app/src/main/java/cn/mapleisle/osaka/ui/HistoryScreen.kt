@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -23,6 +22,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import android.widget.TextView
+import androidx.compose.ui.graphics.toArgb
+import io.noties.markwon.Markwon
 import cn.mapleisle.osaka.data.HistoryManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -171,9 +174,25 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                SelectionContainer {
-                    Text(selectedFileContent ?: "")
-                }
+                // Palette UX Improvement: Render Markdown content instead of plain text
+                val contentColor = MaterialTheme.colorScheme.onSurface.toArgb()
+                val context = LocalContext.current
+                val markwon = remember(context) { Markwon.create(context) }
+
+                AndroidView(
+                    factory = { ctx ->
+                        TextView(ctx).apply {
+                            setTextColor(contentColor)
+                            textSize = 16f
+                            setTextIsSelectable(true)
+                        }
+                    },
+                    update = { textView ->
+                        textView.setTextColor(contentColor)
+                        markwon.setMarkdown(textView, selectedFileContent ?: "")
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
