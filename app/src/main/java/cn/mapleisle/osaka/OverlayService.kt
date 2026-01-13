@@ -153,7 +153,17 @@ class OverlayService : LifecycleService() {
                     }
                 }
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(top = 8.dp, start = 12.dp, end = 12.dp, bottom = 12.dp)) {
+                // Drag Handle
+                Box(
+                    modifier = Modifier
+                        .width(32.dp)
+                        .height(4.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
                 // Top Bar: Status + Close
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
