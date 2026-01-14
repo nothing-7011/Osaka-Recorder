@@ -9,3 +9,7 @@
 ## 2026-01-14 - [Semantic Headings for Section Titles]
 **Learning:** Visual text hierarchies (like "Interface" or "API Configuration") are invisible to screen readers without semantic markup, making navigation difficult for non-visual users.
 **Action:** Always apply `Modifier.semantics { heading() }` to text elements that function as section headers, even if they are already styled typographically.
+
+## 2024-06-01 - [Consistent Content Rendering]
+**Learning:** When an application generates structured content (like Markdown), rendering it as plain text in secondary views (like History) creates a jarring disconnect and reduces readability compared to the primary view (Overlay).
+**Action:** Use `Markwon` via `AndroidView` consistently across all surfaces where user-generated content is displayed, ensuring `textSize` and `textColor` match the surrounding theme context.
