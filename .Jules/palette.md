@@ -5,3 +5,7 @@
 ## 2024-05-31 - [Visual Affordance for Draggable Overlays]
 **Learning:** Floating overlay windows that lack standard OS chrome (title bars) can be ambiguous to interact with. Users may not realize they can reposition the window without explicit visual cues.
 **Action:** Add a small pill-shaped drag handle (e.g., 32dp x 4dp, LightGray, 50% opacity) at the top center of draggable cards to provide a clear affordance for the drag gesture.
+
+## 2026-01-14 - [Semantic Headings for Section Titles]
+**Learning:** Visual text hierarchies (like "Interface" or "API Configuration") are invisible to screen readers without semantic markup, making navigation difficult for non-visual users.
+**Action:** Always apply `Modifier.semantics { heading() }` to text elements that function as section headers, even if they are already styled typographically.
