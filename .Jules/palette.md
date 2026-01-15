@@ -9,3 +9,7 @@
 ## 2026-01-14 - [Semantic Headings for Section Titles]
 **Learning:** Visual text hierarchies (like "Interface" or "API Configuration") are invisible to screen readers without semantic markup, making navigation difficult for non-visual users.
 **Action:** Always apply `Modifier.semantics { heading() }` to text elements that function as section headers, even if they are already styled typographically.
+
+## 2025-01-15 - [Dynamic Sizing for Multi-line Inputs]
+**Learning:** Using fixed `height()` modifiers on text fields (like `120.dp`) prevents the input area from scaling correctly when users increase their font size (Dynamic Type), potentially cutting off text or cursor.
+**Action:** Replace fixed height modifiers with `minLines` and `maxLines` to ensure the input field adapts to the text size while maintaining a comfortable touch target.
