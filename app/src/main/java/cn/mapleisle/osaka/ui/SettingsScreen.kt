@@ -177,7 +177,10 @@ fun SettingsScreen(
                 label = { Text("Model Name") },
                 placeholder = { Text("gpt-4o") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.None,
+                    imeAction = ImeAction.Next
+                ),
                 trailingIcon = if (modelName.isNotEmpty()) {
                     {
                         IconButton(onClick = { modelName = "" }) {
@@ -231,7 +234,9 @@ fun SettingsScreen(
                 value = systemPrompt,
                 onValueChange = { systemPrompt = it },
                 label = { Text("System Prompt") },
-                modifier = Modifier.fillMaxWidth().height(120.dp),
+                placeholder = { Text("e.g. You are a helpful assistant.") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
                 maxLines = 5,
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
