@@ -5,9 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import android.widget.TextView
+import android.util.TypedValue
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.viewinterop.AndroidView
+import io.noties.markwon.Markwon
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.History
@@ -171,9 +175,24 @@ fun HistoryScreen(onNavigateBack: () -> Unit) {
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                SelectionContainer {
-                    Text(selectedFileContent ?: "")
-                }
+                val textColor = MaterialTheme.colorScheme.onSurface.toArgb()
+                val context = LocalContext.current
+                val markwon = remember(context) { Markwon.create(context) }
+
+                // Palette UX Improvement: Render content as Markdown for better readability
+                AndroidView(
+                    factory = { ctx ->
+                        TextView(ctx).apply {
+                            setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                            setTextIsSelectable(true)
+                        }
+                    },
+                    update = { textView ->
+                        textView.setTextColor(textColor)
+                        markwon.setMarkdown(textView, selectedFileContent ?: "")
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
