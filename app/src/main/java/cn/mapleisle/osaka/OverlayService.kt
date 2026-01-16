@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -26,21 +27,21 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-// 使用扩展函数
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeViewModelStoreOwner
-import android.widget.TextView
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import cn.mapleisle.osaka.data.HistoryManager
 import io.noties.markwon.Markwon
@@ -108,6 +109,7 @@ class OverlayService : LifecycleService() {
         val scrollState = rememberScrollState()
         val historyFiles = remember { mutableStateListOf<File>() }
         var showHistoryDropdown by remember { mutableStateOf(false) }
+        var isDragging by remember { mutableStateOf(false) }
 
         // Load initial history
         LaunchedEffect(Unit) {
@@ -144,7 +146,14 @@ class OverlayService : LifecycleService() {
                 .wrapContentHeight()
                 .padding(8.dp)
                 .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
+                    detectDragGestures(
+                        onDragStart = {
+                            isDragging = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        onDragEnd = { isDragging = false },
+                        onDragCancel = { isDragging = false }
+                    ) { change, dragAmount ->
                         change.consume()
                         val params = overlayView.layoutParams as WindowManager.LayoutParams
                         params.x += dragAmount.x.toInt()
@@ -160,7 +169,11 @@ class OverlayService : LifecycleService() {
                         .width(32.dp)
                         .height(4.dp)
                         .align(Alignment.CenterHorizontally)
-                        .background(Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+                        .background(
+                            Color.LightGray.copy(alpha = if (isDragging) 0.9f else 0.5f),
+                            RoundedCornerShape(2.dp)
+                        )
+                        .semantics { contentDescription = "Window Drag Handle" }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
