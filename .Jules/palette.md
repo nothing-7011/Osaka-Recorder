@@ -13,3 +13,7 @@
 ## 2024-06-01 - [Consistent Content Rendering]
 **Learning:** When an application generates structured content (like Markdown), rendering it as plain text in secondary views (like History) creates a jarring disconnect and reduces readability compared to the primary view (Overlay).
 **Action:** Use `Markwon` via `AndroidView` consistently across all surfaces where user-generated content is displayed, ensuring `textSize` and `textColor` match the surrounding theme context.
+
+## 2024-06-02 - [Actionability in Focus-Restricted Windows]
+**Learning:** Floating windows (Overlay/Service views) with `FLAG_NOT_FOCUSABLE` prevent standard system interactions like text selection, effectively trapping content.
+**Action:** Explicitly implement action buttons (like "Copy to Clipboard") for text content in floating windows to compensate for the lack of native selection capabilities.
