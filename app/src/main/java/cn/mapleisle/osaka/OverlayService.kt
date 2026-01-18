@@ -15,6 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -26,6 +28,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -231,6 +234,31 @@ class OverlayService : LifecycleService() {
                                     }
                                 )
                             }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+                    var isCopied by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(isCopied) {
+                        if (isCopied) {
+                            kotlinx.coroutines.delay(2000)
+                            isCopied = false
+                        }
+                    }
+
+                    IconButton(
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(displayContent))
+                            isCopied = true
+                        }
+                    ) {
+                        if (isCopied) {
+                            Icon(Icons.Filled.Done, "Copied", tint = Color.Green)
+                        } else {
+                            Icon(Icons.Filled.ContentCopy, "Copy Content", tint = Color.LightGray)
                         }
                     }
                 }

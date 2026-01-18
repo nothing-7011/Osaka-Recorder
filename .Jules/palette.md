@@ -13,3 +13,7 @@
 ## 2024-06-01 - [Consistent Content Rendering]
 **Learning:** When an application generates structured content (like Markdown), rendering it as plain text in secondary views (like History) creates a jarring disconnect and reduces readability compared to the primary view (Overlay).
 **Action:** Use `Markwon` via `AndroidView` consistently across all surfaces where user-generated content is displayed, ensuring `textSize` and `textColor` match the surrounding theme context.
+
+## 2024-06-03 - [Explicit Copy Action for Overlay Windows]
+**Learning:** Android overlay windows using `FLAG_NOT_FOCUSABLE` prevent standard text selection and context menus, trapping content inside the view.
+**Action:** Always provide a dedicated "Copy to Clipboard" button for read-only text content in overlay windows, with immediate visual feedback (e.g., icon change) since Toasts may be less visible or disruptive.
