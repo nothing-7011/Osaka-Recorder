@@ -24,6 +24,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import cn.mapleisle.osaka.data.ConfigManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -231,8 +233,10 @@ fun SettingsScreen(
                 value = systemPrompt,
                 onValueChange = { systemPrompt = it },
                 label = { Text("System Prompt") },
-                modifier = Modifier.fillMaxWidth().height(120.dp),
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
                 maxLines = 5,
+                placeholder = { Text("e.g. You are a helpful assistant.") },
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Default
