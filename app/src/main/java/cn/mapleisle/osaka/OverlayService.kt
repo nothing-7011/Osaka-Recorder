@@ -15,6 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -25,7 +27,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -44,6 +49,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import cn.mapleisle.osaka.data.HistoryManager
 import io.noties.markwon.Markwon
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 
 class OverlayService : LifecycleService() {
@@ -135,6 +142,11 @@ class OverlayService : LifecycleService() {
                 displayContent = it.readText()
             }
         }
+
+        val context = LocalContext.current
+        val markwon = remember(context) { Markwon.create(context) }
+        val clipboardManager = LocalClipboardManager.current
+        val coroutineScope = rememberCoroutineScope()
 
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -233,6 +245,27 @@ class OverlayService : LifecycleService() {
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Copy Button
+                    var isCopied by remember { mutableStateOf(false) }
+                    IconButton(
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(displayContent))
+                            isCopied = true
+                            coroutineScope.launch {
+                                delay(2000)
+                                isCopied = false
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isCopied) Icons.Filled.Done else Icons.Filled.ContentCopy,
+                            contentDescription = if (isCopied) "Copied" else "Copy to clipboard",
+                            tint = if (isCopied) Color.Green else Color.LightGray
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -254,7 +287,6 @@ class OverlayService : LifecycleService() {
                             }
                         },
                         update = { textView ->
-                            val markwon = Markwon.create(textView.context)
                             markwon.setMarkdown(textView, displayContent)
                         }
                     )
