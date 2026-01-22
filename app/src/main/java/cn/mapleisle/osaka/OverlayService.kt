@@ -15,6 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -108,6 +110,9 @@ class OverlayService : LifecycleService() {
         val scrollState = rememberScrollState()
         val historyFiles = remember { mutableStateListOf<File>() }
         var showHistoryDropdown by remember { mutableStateOf(false) }
+        val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+        var isCopied by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
 
         // Load initial history
         LaunchedEffect(Unit) {
@@ -231,6 +236,46 @@ class OverlayService : LifecycleService() {
                                     }
                                 )
                             }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    IconButton(
+                        onClick = {
+                            currentDisplayedFile.value?.let { file ->
+                                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                    try {
+                                        val text = file.readText()
+                                        // Update UI on Main thread
+                                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                            clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(text))
+                                            isCopied = true
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+                            }
+                        },
+                        enabled = currentDisplayedFile.value != null
+                    ) {
+                        if (isCopied) {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Copied",
+                                tint = Color.Green
+                            )
+                            LaunchedEffect(Unit) {
+                                kotlinx.coroutines.delay(2000)
+                                isCopied = false
+                            }
+                        } else {
+                            Icon(
+                                imageVector = Icons.Filled.ContentCopy,
+                                contentDescription = "Copy result",
+                                tint = Color.White
+                            )
                         }
                     }
                 }
