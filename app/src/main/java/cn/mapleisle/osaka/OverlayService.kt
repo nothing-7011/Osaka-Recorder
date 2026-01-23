@@ -15,6 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -25,9 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.LifecycleService
@@ -105,9 +111,12 @@ class OverlayService : LifecycleService() {
     @Composable
     fun OverlayUI() {
         val haptic = LocalHapticFeedback.current
+        val clipboardManager = LocalClipboardManager.current
+        val scope = rememberCoroutineScope()
         val scrollState = rememberScrollState()
         val historyFiles = remember { mutableStateListOf<File>() }
         var showHistoryDropdown by remember { mutableStateOf(false) }
+        var isCopied by remember { mutableStateOf(false) }
 
         // Load initial history
         LaunchedEffect(Unit) {
@@ -232,6 +241,28 @@ class OverlayService : LifecycleService() {
                                 )
                             }
                         }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Palette: Copy Button
+                    IconButton(
+                        onClick = {
+                            if (displayContent.isNotEmpty()) {
+                                clipboardManager.setText(AnnotatedString(displayContent))
+                                isCopied = true
+                                scope.launch {
+                                    delay(2000)
+                                    isCopied = false
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isCopied) Icons.Filled.Done else Icons.Filled.ContentCopy,
+                            contentDescription = if (isCopied) "Copied" else "Copy content",
+                            tint = if (isCopied) Color.Green else Color.LightGray
+                        )
                     }
                 }
 
