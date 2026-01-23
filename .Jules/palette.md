@@ -13,3 +13,7 @@
 ## 2024-06-01 - [Consistent Content Rendering]
 **Learning:** When an application generates structured content (like Markdown), rendering it as plain text in secondary views (like History) creates a jarring disconnect and reduces readability compared to the primary view (Overlay).
 **Action:** Use `Markwon` via `AndroidView` consistently across all surfaces where user-generated content is displayed, ensuring `textSize` and `textColor` match the surrounding theme context.
+
+## 2024-06-02 - [Feedback for Invisible Actions]
+**Learning:** Actions like "Copy to Clipboard" have no inherent visual result. Without explicit feedback, users are unsure if the action succeeded, leading to frustration or repeated clicks.
+**Action:** Provide immediate, temporary visual feedback for invisible actions by swapping the action icon (e.g., 'Copy' -> 'Checkmark') and tinting it (e.g., Green) for a short duration (2s) before reverting.
