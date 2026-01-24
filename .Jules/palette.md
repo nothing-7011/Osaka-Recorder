@@ -13,3 +13,7 @@
 ## 2024-06-01 - [Consistent Content Rendering]
 **Learning:** When an application generates structured content (like Markdown), rendering it as plain text in secondary views (like History) creates a jarring disconnect and reduces readability compared to the primary view (Overlay).
 **Action:** Use `Markwon` via `AndroidView` consistently across all surfaces where user-generated content is displayed, ensuring `textSize` and `textColor` match the surrounding theme context.
+
+## 2024-06-02 - [Feedback in Overlay Contexts]
+**Learning:** In floating overlay windows (`TYPE_APPLICATION_OVERLAY`), standard feedback mechanisms like `Snackbar` are often unavailable or intrusive. Users still need confirmation for actions like "Copy".
+**Action:** Use inline visual state changes (temporarily swapping icons to `Check` or changing color) to provide immediate, unobtrusive feedback for actions within overlays.
