@@ -13,3 +13,7 @@
 ## 2024-06-01 - [Consistent Content Rendering]
 **Learning:** When an application generates structured content (like Markdown), rendering it as plain text in secondary views (like History) creates a jarring disconnect and reduces readability compared to the primary view (Overlay).
 **Action:** Use `Markwon` via `AndroidView` consistently across all surfaces where user-generated content is displayed, ensuring `textSize` and `textColor` match the surrounding theme context.
+
+## 2026-01-25 - [Action Feedback in Overlays]
+**Learning:** Standard feedback mechanisms like `Snackbar` are often unavailable in floating overlay windows (Service context). Without feedback, users are unsure if silent actions (like "Copy") succeeded.
+**Action:** Implement localized visual feedback for icon-only actions in overlays, such as temporarily swapping the icon to a checkmark (e.g., `Icons.Filled.Done`) for 2 seconds using `LaunchedEffect`.
