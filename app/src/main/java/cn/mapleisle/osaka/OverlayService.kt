@@ -15,6 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -25,7 +27,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -44,6 +48,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import cn.mapleisle.osaka.data.HistoryManager
 import io.noties.markwon.Markwon
+import kotlinx.coroutines.delay
 import java.io.File
 
 class OverlayService : LifecycleService() {
@@ -242,22 +247,59 @@ class OverlayService : LifecycleService() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 100.dp, max = 300.dp)
-                        .background(Color(0x66000000), RoundedCornerShape(8.dp))
-                        .padding(8.dp)
-                        .verticalScroll(scrollState)
                 ) {
-                    AndroidView(
-                        factory = { ctx ->
-                            TextView(ctx).apply {
-                                setTextColor(android.graphics.Color.WHITE)
-                                textSize = 13f
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0x66000000), RoundedCornerShape(8.dp))
+                            .padding(8.dp)
+                            .verticalScroll(scrollState)
+                    ) {
+                        AndroidView(
+                            factory = { ctx ->
+                                TextView(ctx).apply {
+                                    setTextColor(android.graphics.Color.WHITE)
+                                    textSize = 13f
+                                }
+                            },
+                            update = { textView ->
+                                val markwon = Markwon.create(textView.context)
+                                markwon.setMarkdown(textView, displayContent)
                             }
-                        },
-                        update = { textView ->
-                            val markwon = Markwon.create(textView.context)
-                            markwon.setMarkdown(textView, displayContent)
+                        )
+                    }
+
+                    // Palette UX: Copy button
+                    val clipboardManager = LocalClipboardManager.current
+                    var isCopied by remember { mutableStateOf(false) }
+
+                    if (isCopied) {
+                        LaunchedEffect(Unit) {
+                            delay(2000)
+                            isCopied = false
                         }
-                    )
+                    }
+
+                    if (displayContent.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(displayContent))
+                                isCopied = true
+                            },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .background(Color(0x33000000), RoundedCornerShape(50)) // Pill/Circle shape
+                                .size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isCopied) Icons.Filled.Done else Icons.Filled.ContentCopy,
+                                contentDescription = if (isCopied) "Copied" else "Copy Text",
+                                tint = if (isCopied) Color.Green else Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
