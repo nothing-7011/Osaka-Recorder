@@ -15,7 +15,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Notifications
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -243,21 +247,53 @@ class OverlayService : LifecycleService() {
                         .fillMaxWidth()
                         .heightIn(min = 100.dp, max = 300.dp)
                         .background(Color(0x66000000), RoundedCornerShape(8.dp))
-                        .padding(8.dp)
-                        .verticalScroll(scrollState)
                 ) {
-                    AndroidView(
-                        factory = { ctx ->
-                            TextView(ctx).apply {
-                                setTextColor(android.graphics.Color.WHITE)
-                                textSize = 13f
+                    // Scrollable text content
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                            .verticalScroll(scrollState)
+                    ) {
+                        AndroidView(
+                            factory = { ctx ->
+                                TextView(ctx).apply {
+                                    setTextColor(android.graphics.Color.WHITE)
+                                    textSize = 13f
+                                }
+                            },
+                            update = { textView ->
+                                val markwon = Markwon.create(textView.context)
+                                markwon.setMarkdown(textView, displayContent)
+                            }
+                        )
+                    }
+
+                    // Floating Copy Button
+                    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+                    val scope = rememberCoroutineScope()
+                    var isCopied by remember { mutableStateOf(false) }
+
+                    IconButton(
+                        onClick = {
+                            clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(displayContent))
+                            isCopied = true
+                            scope.launch {
+                                delay(2000)
+                                isCopied = false
                             }
                         },
-                        update = { textView ->
-                            val markwon = Markwon.create(textView.context)
-                            markwon.setMarkdown(textView, displayContent)
-                        }
-                    )
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isCopied) Icons.Filled.Done else Icons.Filled.ContentCopy,
+                            contentDescription = if (isCopied) "Copied" else "Copy Text",
+                            tint = if (isCopied) Color.Green else Color.LightGray.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
