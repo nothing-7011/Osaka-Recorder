@@ -15,6 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
@@ -25,7 +27,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -44,6 +49,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import cn.mapleisle.osaka.data.HistoryManager
 import io.noties.markwon.Markwon
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 
 class OverlayService : LifecycleService() {
@@ -105,9 +112,13 @@ class OverlayService : LifecycleService() {
     @Composable
     fun OverlayUI() {
         val haptic = LocalHapticFeedback.current
+        val clipboardManager = LocalClipboardManager.current
+        val scope = rememberCoroutineScope()
         val scrollState = rememberScrollState()
         val historyFiles = remember { mutableStateListOf<File>() }
         var showHistoryDropdown by remember { mutableStateOf(false) }
+        var isCopied by remember { mutableStateOf(false) }
+        var resetCopyJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
 
         // Load initial history
         LaunchedEffect(Unit) {
@@ -233,11 +244,35 @@ class OverlayService : LifecycleService() {
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    IconButton(
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(displayContent))
+                            isCopied = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            resetCopyJob?.cancel()
+                            resetCopyJob = scope.launch {
+                                delay(2000)
+                                isCopied = false
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isCopied) Icons.Filled.Done else Icons.Filled.ContentCopy,
+                            contentDescription = if (isCopied) "Copied successfully" else "Copy transcript",
+                            tint = if (isCopied) Color(0xFF4CAF50) else Color.White
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Content Area: Markdown
+                val context = LocalContext.current
+                val markwon = remember(context) { Markwon.create(context) }
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -254,7 +289,6 @@ class OverlayService : LifecycleService() {
                             }
                         },
                         update = { textView ->
-                            val markwon = Markwon.create(textView.context)
                             markwon.setMarkdown(textView, displayContent)
                         }
                     )
